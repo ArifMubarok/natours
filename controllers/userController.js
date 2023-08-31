@@ -22,10 +22,7 @@ const multerFilter = (request, file, callback) => {
   if (file.mimetype.startsWith('image')) {
     callback(null, true);
   } else {
-    callback(
-      new AppError('Not an image file! Please upload only image ', 400),
-      false,
-    );
+    callback(new AppError('Not an image file! Please upload only image ', 400), false);
   }
 };
 
@@ -38,7 +35,7 @@ exports.uploadUserPhoto = upload.single('photo');
 
 exports.resizeUserPhoto = catchAsync(async (request, response, next) => {
   if (!request.file) return next();
-
+  console.log(request.file);
   request.file.filename = `user-${request.user.id}-${Date.now()}.jpeg`;
 
   await sharp(request.file.buffer)
@@ -69,16 +66,15 @@ exports.updateMe = catchAsync(async (request, response, next) => {
     );
   }
 
-  // 2) Filter the body out unwanted fields name that are not allowed to be updated
+  // 2) Filter the body fields that we want to update
   const filteredBody = filterObj(request.body, 'email', 'name');
   if (request.file) filteredBody.photo = request.file.filename;
 
   // 3) Update user document
-  const updatedUser = await User.findByIdAndUpdate(
-    request.user.id,
-    filteredBody,
-    { new: true, runValidators: true },
-  );
+  const updatedUser = await User.findByIdAndUpdate(request.user.id, filteredBody, {
+    new: true,
+    runValidators: true,
+  });
 
   response.status(200).json({
     status: 'success',

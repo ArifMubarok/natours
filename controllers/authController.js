@@ -64,7 +64,6 @@ exports.login = catchAsync(async (request, response, next) => {
 
   // check if user is exist && password is correct
   const user = await User.findOne({ email }).select('+password');
-
   if (!user || !(await user.correctPassword(password, user.password)))
     return next(new AppError('Incorect email or password', 401));
 
@@ -173,7 +172,6 @@ exports.forgotPassword = catchAsync(async (request, response, next) => {
     return next(new AppError('There is no user with email address', 404));
 
   // 2) Generate random token
-
   const resetToken = await user.createPasswordResetToken();
   await user.save({ validateBeforeSave: false });
 
